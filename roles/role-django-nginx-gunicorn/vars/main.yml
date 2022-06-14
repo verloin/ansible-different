@@ -1,0 +1,9 @@
+---
+# vars file for role-configure-django
+  project_name_path: /var/www/portal
+  project_name: Portal
+
+# vars for nginx
+  hostname: node01
+  root: /var/www/portal
+  domain: example.com

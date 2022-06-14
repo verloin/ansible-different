@@ -1,0 +1,35 @@
+---
+- name: Install Gitlab
+  hosts: gitlab
+  become: true
+  tasks:
+  - name: install dependencies
+    apt:
+      name: "{{item}}"
+      state: present
+      update_cache: yes
+    loop:
+      - ca-certificates
+      - curl
+      - openssh-server
+      - lsb-release
+      - openssl
+      - tzdata
+
+
+  - name: Download script.deb.sh
+    shell: curl -LO https://packages.gitlab.com/install/repositories/gitlab/gitlab-ce/script.deb.sh
+
+  - name: Execute script.deb.sh
+    shell: bash script.deb.sh
+
+  - name: install gitlab
+    apt:
+      name: gitlab-ce
+      state: latest
+
+  handlers:
+  - name: restart gitlab
+    command: gitlab-ctl reconfigure
+    register: gitlab_restart
+    failed_when: gitlab_restart_handler_failed_when | bool

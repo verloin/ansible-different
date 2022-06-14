@@ -1,0 +1,35 @@
+---
+  hosts: "{{ HOST }}"
+  become: true
+  vars:
+    HOST: "node01"
+    GITLAB_URL: "gitlab.example.com"
+    GITLAB_RUNNER_REGISTRATION_TOKEN: " "
+    PROJECT_NAME: "portal"
+    PROJECT_NAME_PATH: "/var/www/portal/"
+    EXECUTOR: "shell"
+
+- tasks:
+  - name: Unregister all previously used GitLab Runners
+    shell: |
+      sudo gitlab-runner unregister --all-runners
+
+  - name: Register Gitlab-Runners using shell executor
+    shell: |
+      gitlab-runner register --non-interactive --url '{{ GITLAB_URL }}' --registration-token '{{ GITLAB_RUNNER_REGISTRATION_TOKEN }}' --description '{{ PROJECT_NAME }}' --executor {{ EXECUTOR }}
+
+  - name: Add gitlab-runner user to root group
+    shell: |
+      sudo usermod -aG root gitlab-runner
+
+  - name: Create directory for project
+    file:
+      path: "{{ PROJECT_NAME_PATH }}"
+      state: directory
+      recurse: yes
+      owner: gitlab-runner
+      group: root
+
+  - name: Add user gitlab-runner to group root
+    shell: |
+      usermod -aG root gitlab-runner
